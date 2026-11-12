@@ -1,0 +1,155 @@
+<mxfile host="app.diagrams.net" version="24.7.17">
+  <diagram id="chunking" name="Partie 1 - chunking">
+    <mxGraphModel dx="1600" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1640" pageHeight="1060" background="#FCFCFB" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ============ Entrée et nettoyage commun ============ -->
+        <mxCell id="in" value="&lt;b&gt;df['body']&lt;/b&gt;&lt;br&gt;1 000 articles bruts" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fontSize=12;fillColor=#F0EFEC;strokeColor=#898781;fontColor=#0B0B0B;" vertex="1" parent="1">
+          <mxGeometry x="360" y="20" width="200" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="clean" value="&lt;b&gt;nettoyer()&lt;/b&gt;, appliqué aux deux méthodes&lt;br&gt;coupe à la 1re section de fin vide · retire « ( , ) » et la catégorie Homonymie · espaces doubles → simples&lt;br&gt;&lt;i&gt;7,3 % du texte retiré, 757 articles raccourcis : le même texte entre dans chaque méthode&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fontSize=12;spacing=8;fillColor=#F0EFEC;strokeColor=#898781;fontColor=#0B0B0B;" vertex="1" parent="1">
+          <mxGeometry x="620" y="15" width="640" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="e_in" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#52514E;strokeWidth=1.5;" edge="1" parent="1" source="in" target="clean">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ============ Méthode 1 : fenêtre fixe ============ -->
+        <mxCell id="laneA" value="MÉTHODE 1 : fenêtre fixe, T = 400 caractères, chevauchement O = 50" style="swimlane;html=1;startSize=32;fillColor=#E3EEFB;swimlaneFillColor=#FCFCFB;strokeColor=#2A78D6;fontColor=#0B0B0B;fontStyle=1;fontSize=13;align=left;spacingLeft=12;rounded=1;arcSize=3;" vertex="1" parent="1">
+          <mxGeometry x="20" y="130" width="760" height="600" as="geometry" />
+        </mxCell>
+        <mxCell id="barre" value="texte nettoyé : « Paul Jules Antoine Meillet, né le à Moulins (Allier) et mort le à Châteaumeillant (Cher), est le principal … »" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;align=left;spacingLeft=8;fillColor=#F0EFEC;strokeColor=#898781;fontColor=#52514E;" vertex="1" parent="laneA">
+          <mxGeometry x="20" y="55" width="720" height="34" as="geometry" />
+        </mxCell>
+        <!-- échelle : 1 caractère = 0,9 px ; pas = 350 car. = 315 px ; fenêtre = 400 car. = 360 px -->
+        <mxCell id="w0" value="chunk 0 : caractères [0, 400)" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fontSize=11;fillColor=#CDE2FB;strokeColor=#2A78D6;fontColor=#0B0B0B;" vertex="1" parent="laneA">
+          <mxGeometry x="20" y="110" width="360" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="w1" value="chunk 1 : [350, 750)" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fontSize=11;fillColor=#CDE2FB;strokeColor=#2A78D6;fontColor=#0B0B0B;" vertex="1" parent="laneA">
+          <mxGeometry x="335" y="160" width="360" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="w2" value="" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fontSize=11;fillColor=#CDE2FB;strokeColor=#2A78D6;fontColor=#0B0B0B;dashed=1;" vertex="1" parent="laneA">
+          <mxGeometry x="650" y="210" width="90" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="w2_lbl" value="chunk 2 : [700, 1100) …" style="text;html=1;fontSize=11;fontColor=#0B0B0B;align=right;verticalAlign=middle;" vertex="1" parent="laneA">
+          <mxGeometry x="470" y="212" width="170" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ov1" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F3E3B0;strokeColor=#C98500;opacity=90;" vertex="1" parent="laneA">
+          <mxGeometry x="335" y="110" width="45" height="84" as="geometry" />
+        </mxCell>
+        <mxCell id="ov2" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F3E3B0;strokeColor=#C98500;opacity=90;" vertex="1" parent="laneA">
+          <mxGeometry x="650" y="160" width="45" height="84" as="geometry" />
+        </mxCell>
+        <mxCell id="ov_lbl" value="zone jaune : chevauchement O = 50 car., présent dans deux chunks" style="text;html=1;fontSize=11;fontColor=#52514E;align=left;verticalAlign=middle;" vertex="1" parent="laneA">
+          <mxGeometry x="20" y="232" width="420" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="pas" value="pas = T − O = 350 caractères" style="text;html=1;fontSize=11;fontColor=#52514E;align=left;" vertex="1" parent="laneA">
+          <mxGeometry x="20" y="160" width="250" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="formA" value="&lt;b&gt;Formules&lt;/b&gt;&lt;br&gt;nombre de chunks = 1 + ⌈(L − T) / (T − O)⌉&lt;br&gt;redondance ≈ T / (T − O) = 400 / 350 ≈ 1,14 (mesurée : 1,13)" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;spacing=8;fillColor=#FCFCFB;strokeColor=#2A78D6;dashed=1;fontColor=#0B0B0B;align=left;" vertex="1" parent="laneA">
+          <mxGeometry x="20" y="265" width="720" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="cutA" value="&lt;b&gt;Ce que donne la coupe à l'aveugle (chunks réels de « Antoine Meillet »)&lt;/b&gt;&lt;br&gt;… à la tête de la &lt;b&gt;c&lt;/b&gt; ┃ &lt;b&gt;da&lt;/b&gt; au linguiste Auguste Carrière à la tête de la chaire …&lt;br&gt;… parmi lesquels Émile Benveniste, Marcel Cohen, Georges ┃ lesquels Émile Benveniste …" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;spacing=8;fillColor=#FCFCFB;strokeColor=#898781;fontColor=#0B0B0B;align=left;" vertex="1" parent="laneA">
+          <mxGeometry x="20" y="365" width="720" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="bilanA" value="&lt;b&gt;+&lt;/b&gt; simple, rapide, taille connue d'avance&lt;br&gt;&lt;b&gt;−&lt;/b&gt; 82 % des chunks coupent un mot ; 14 % commencent proprement ; 7 % restent tronqués par l'encodeur (la taille en caractères n'est qu'une approximation des tokens)" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;spacing=8;fillColor=#E3EEFB;strokeColor=#2A78D6;fontColor=#0B0B0B;align=left;" vertex="1" parent="laneA">
+          <mxGeometry x="20" y="475" width="720" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- ============ Méthode 2 : récursif ============ -->
+        <mxCell id="laneB" value="MÉTHODE 2 : récursif, au plus 110 tokens MiniLM, chevauchement 15 tokens" style="swimlane;html=1;startSize=32;fillColor=#FCE6DC;swimlaneFillColor=#FCFCFB;strokeColor=#EB6834;fontColor=#0B0B0B;fontStyle=1;fontSize=13;align=left;spacingLeft=12;rounded=1;arcSize=3;" vertex="1" parent="1">
+          <mxGeometry x="820" y="130" width="800" height="600" as="geometry" />
+        </mxCell>
+        <mxCell id="root" value="&lt;b&gt;texte ≤ 110 tokens ?&lt;/b&gt;&lt;br&gt;non → couper sur le 1er séparateur présent" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fontSize=12;fillColor=#FFFFFF;strokeColor=#EB6834;fontColor=#0B0B0B;" vertex="1" parent="laneB">
+          <mxGeometry x="250" y="48" width="300" height="56" as="geometry" />
+        </mxCell>
+        <mxCell id="lvl1" value="niveau 1 : « \n\n » (paragraphes)" style="text;html=1;fontSize=11;fontStyle=2;fontColor=#52514E;align=left;" vertex="1" parent="laneB">
+          <mxGeometry x="20" y="118" width="260" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="p1" value="§1 · 60 tok ✓" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fontSize=11;fillColor=#FCE6DC;strokeColor=#EB6834;fontColor=#0B0B0B;" vertex="1" parent="laneB">
+          <mxGeometry x="20" y="148" width="150" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p2" value="§2 · 240 tok ✗ trop long" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fontSize=11;fillColor=#FFFFFF;strokeColor=#EB6834;strokeWidth=2;dashed=1;fontColor=#0B0B0B;" vertex="1" parent="laneB">
+          <mxGeometry x="200" y="148" width="180" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p3" value="§3 · 45 tok ✓" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fontSize=11;fillColor=#FCE6DC;strokeColor=#EB6834;fontColor=#0B0B0B;" vertex="1" parent="laneB">
+          <mxGeometry x="410" y="148" width="150" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p4" value="§4 · 40 tok ✓" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fontSize=11;fillColor=#FCE6DC;strokeColor=#EB6834;fontColor=#0B0B0B;" vertex="1" parent="laneB">
+          <mxGeometry x="590" y="148" width="150" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="lvl2" value="← niveau 2 : « \n » (titre de section, lignes)" style="text;html=1;fontSize=11;fontStyle=2;fontColor=#52514E;align=left;verticalAlign=middle;" vertex="1" parent="laneB">
+          <mxGeometry x="475" y="248" width="300" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="l1" value="« Biographie » · 3 tok ✓" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fontSize=11;fillColor=#FCE6DC;strokeColor=#EB6834;fontColor=#0B0B0B;" vertex="1" parent="laneB">
+          <mxGeometry x="110" y="240" width="170" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="l2" value="ligne · 237 tok ✗" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fontSize=11;fillColor=#FFFFFF;strokeColor=#EB6834;strokeWidth=2;dashed=1;fontColor=#0B0B0B;" vertex="1" parent="laneB">
+          <mxGeometry x="300" y="240" width="160" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="lvl3" value="← niveau 3 : « . » (phrases)&lt;br&gt;puis niveau 4 : « » (mots)&lt;br&gt;si une phrase dépasse encore" style="text;html=1;fontSize=11;fontStyle=2;fontColor=#52514E;align=left;verticalAlign=middle;" vertex="1" parent="laneB">
+          <mxGeometry x="595" y="322" width="190" height="56" as="geometry" />
+        </mxCell>
+        <mxCell id="s1" value="phrase · 70 ✓" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fontSize=11;fillColor=#FCE6DC;strokeColor=#EB6834;fontColor=#0B0B0B;" vertex="1" parent="laneB">
+          <mxGeometry x="200" y="330" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="s2" value="phrase · 95 ✓" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fontSize=11;fillColor=#FCE6DC;strokeColor=#EB6834;fontColor=#0B0B0B;" vertex="1" parent="laneB">
+          <mxGeometry x="330" y="330" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="s3" value="phrase · 72 ✓" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fontSize=11;fillColor=#FCE6DC;strokeColor=#EB6834;fontColor=#0B0B0B;" vertex="1" parent="laneB">
+          <mxGeometry x="460" y="330" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="t_p2l1" style="endArrow=none;html=1;strokeColor=#EB6834;strokeWidth=1.2;" edge="1" parent="laneB" source="p2" target="l1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="t_p2l2" style="endArrow=none;html=1;strokeColor=#EB6834;strokeWidth=1.2;" edge="1" parent="laneB" source="p2" target="l2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="t_l2s1" style="endArrow=none;html=1;strokeColor=#EB6834;strokeWidth=1.2;" edge="1" parent="laneB" source="l2" target="s1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="t_l2s2" style="endArrow=none;html=1;strokeColor=#EB6834;strokeWidth=1.2;" edge="1" parent="laneB" source="l2" target="s2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="t_l2s3" style="endArrow=none;html=1;strokeColor=#EB6834;strokeWidth=1.2;" edge="1" parent="laneB" source="l2" target="s3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="t_rp" style="endArrow=none;html=1;strokeColor=#EB6834;strokeWidth=1.2;" edge="1" parent="laneB" source="root" target="p2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fusion" value="&lt;b&gt;Fusion gloutonne, de gauche à droite, à chaque niveau&lt;/b&gt;&lt;br&gt;on ajoute des morceaux voisins tant que le total ≤ 110 tokens ; le chunk suivant repart avec les derniers morceaux (≤ 15 tokens)&lt;br&gt;&lt;i&gt;une phrase fait en général plus de 15 tokens : le chevauchement n'agit presque jamais (redondance 1,01)&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;spacing=8;fillColor=#FCFCFB;strokeColor=#EB6834;dashed=1;fontColor=#0B0B0B;align=left;" vertex="1" parent="laneB">
+          <mxGeometry x="20" y="390" width="760" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="orphan" value="&lt;b&gt;Piège : le titre orphelin.&lt;/b&gt; Avant de redécouper un morceau trop long, l'algorithme émet ce qui précède : « Biographie » (3 tokens) devient un chunk à lui seul.&lt;br&gt;&lt;b&gt;Correction (variante rattachée) :&lt;/b&gt; un chunk de moins de 30 tokens est fusionné avec le suivant (sinon le précédent) si l'union tient dans 110 tokens. Fragments : 10 % → 3 %." style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;spacing=8;fillColor=#E0F4EC;strokeColor=#1BAF7A;fontColor=#0B0B0B;align=left;" vertex="1" parent="laneB">
+          <mxGeometry x="20" y="485" width="760" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e_cA" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#52514E;strokeWidth=1.5;exitX=0.25;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="clean" target="laneA">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_cB" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#52514E;strokeWidth=1.5;exitX=0.75;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="clean" target="laneB">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ============ Sortie commune ============ -->
+        <mxCell id="out" value="&lt;b&gt;chunks : list[dict]&lt;/b&gt;  {chunk_id, doc_id, title, url, methode, position, n_chunks_doc, debut, fin, text, n_car, n_tokens}&lt;br&gt;fixe : 9 156 chunks · récursif : 11 861 · récursif + rattachement : &lt;b&gt;10 926, retenus pour la partie 2&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fontSize=12;spacing=8;fillColor=#F0EFEC;strokeColor=#898781;fontColor=#0B0B0B;" vertex="1" parent="1">
+          <mxGeometry x="220" y="770" width="1200" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="e_Aout" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#52514E;strokeWidth=1.5;entryX=0.2;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="laneA" target="out">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_Bout" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#52514E;strokeWidth=1.5;entryX=0.8;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="laneB" target="out">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cmp" value="&lt;b&gt;Q3 : comparaison&lt;/b&gt;  taille en tokens · % tronqués · débuts et fins propres · mots coupés · fragments · redondance · lecture côte à côte de « Antoine Meillet » et « Atoum »" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fontSize=12;spacing=8;fillColor=#FCFCFB;strokeColor=#52514E;fontColor=#0B0B0B;" vertex="1" parent="1">
+          <mxGeometry x="220" y="870" width="1200" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="e_cmp" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#52514E;strokeWidth=1.5;" edge="1" parent="1" source="out" target="cmp">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

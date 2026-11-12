@@ -1,0 +1,130 @@
+<mxfile host="app.diagrams.net" version="24.7.17">
+  <diagram id="pipeline-rag" name="Pipeline RAG du TP">
+    <mxGraphModel dx="1600" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1620" pageHeight="900" background="#FCFCFB" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ===================== Couloir 1 : indexation hors ligne ===================== -->
+        <mxCell id="lane_off" value="HORS LIGNE : indexation, exécutée une seule fois" style="swimlane;html=1;startSize=32;horizontal=1;fillColor=#F9F9F7;swimlaneFillColor=#FCFCFB;strokeColor=#C3C2B7;fontColor=#0B0B0B;fontStyle=1;fontSize=14;align=left;spacingLeft=12;rounded=1;arcSize=3;" vertex="1" parent="1">
+          <mxGeometry x="20" y="20" width="1580" height="450" as="geometry" />
+        </mxCell>
+
+        <mxCell id="n_hf" value="&lt;b&gt;Flux Hugging Face&lt;/b&gt;&lt;br&gt;kaitchup/wikipedia-20220301-fr-sample-10k&lt;br&gt;&lt;i&gt;streaming, ordre du dump&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;spacing=8;fillColor=#F0EFEC;strokeColor=#898781;fontColor=#0B0B0B;" vertex="1" parent="lane_off">
+          <mxGeometry x="30" y="70" width="230" height="120" as="geometry" />
+        </mxCell>
+
+        <mxCell id="n_filtre" value="&lt;b&gt;Filtre keep_article()&lt;/b&gt;&lt;br&gt;200 ≤ mots ≤ 900&lt;br&gt;« homonymie » absent du titre&lt;br&gt;&lt;b&gt;4 701 lus → 1 000 gardés&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;spacing=8;fillColor=#F0EFEC;strokeColor=#898781;fontColor=#0B0B0B;" vertex="1" parent="lane_off">
+          <mxGeometry x="300" y="70" width="240" height="120" as="geometry" />
+        </mxCell>
+
+        <mxCell id="n_etape0" value="&lt;b&gt;ÉTAPE 0 : exploration&lt;/b&gt;&lt;br&gt;&lt;div style=&quot;text-align:left&quot;&gt;• trous d'extraction : dates, siècles&lt;br&gt;• \n\n entre paragraphes, titres « Titre \n »&lt;br&gt;• sections de fin vides, 48 homonymies&lt;br&gt;• MiniLM : 128 tokens ≈ 400 caractères&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;spacing=10;fillColor=#FDE9DF;strokeColor=#EB6834;strokeWidth=2.5;fontColor=#0B0B0B;" vertex="1" parent="lane_off">
+          <mxGeometry x="580" y="55" width="300" height="150" as="geometry" />
+        </mxCell>
+
+        <mxCell id="badge" value="tu es ici" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;fontSize=11;fontStyle=1;fillColor=#EB6834;strokeColor=none;fontColor=#FFFFFF;" vertex="1" parent="lane_off">
+          <mxGeometry x="790" y="42" width="80" height="24" as="geometry" />
+        </mxCell>
+
+        <mxCell id="n_chunk" value="&lt;b&gt;PARTIE 1 : chunking&lt;/b&gt;&lt;br&gt;&lt;div style=&quot;text-align:left&quot;&gt;• &lt;b&gt;fixe&lt;/b&gt; : fenêtres de T caractères, chevauchement 50&lt;br&gt;• &lt;b&gt;récursif&lt;/b&gt; : \n\n → \n → « . » → espace&lt;br&gt;• nettoyage, fusion des petits blocs&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;spacing=10;fillColor=#E3EEFB;strokeColor=#2A78D6;fontColor=#0B0B0B;" vertex="1" parent="lane_off">
+          <mxGeometry x="920" y="55" width="300" height="150" as="geometry" />
+        </mxCell>
+
+        <mxCell id="n_chunks" value="&lt;b&gt;chunks : list[dict]&lt;/b&gt;&lt;br&gt;{chunk_id, doc_id, title, text}&lt;br&gt;&lt;i&gt;environ 8 à 10 par article&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;spacing=8;fillColor=#F0EFEC;strokeColor=#898781;fontColor=#0B0B0B;" vertex="1" parent="lane_off">
+          <mxGeometry x="1260" y="70" width="290" height="120" as="geometry" />
+        </mxCell>
+
+        <mxCell id="n_tfidf" value="&lt;b&gt;PARTIE 2.1 : index lexical&lt;/b&gt;&lt;br&gt;TfidfVectorizer.fit(chunks)&lt;br&gt;matrice creuse N × V, lignes normées L2" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;spacing=8;fillColor=#E3EEFB;strokeColor=#2A78D6;fontColor=#0B0B0B;" vertex="1" parent="lane_off">
+          <mxGeometry x="920" y="285" width="300" height="120" as="geometry" />
+        </mxCell>
+
+        <mxCell id="n_dense" value="&lt;b&gt;PARTIE 2.2 : index dense&lt;/b&gt;&lt;br&gt;paraphrase-multilingual-MiniLM-L12-v2&lt;br&gt;matrice N × 384, au plus 128 tokens par chunk" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;spacing=8;fillColor=#E3EEFB;strokeColor=#2A78D6;fontColor=#0B0B0B;" vertex="1" parent="lane_off">
+          <mxGeometry x="1260" y="285" width="290" height="120" as="geometry" />
+        </mxCell>
+
+        <mxCell id="n_lecons" value="&lt;b&gt;Ce que l'étape 0 impose à la suite&lt;/b&gt;&lt;br&gt;&lt;div style=&quot;text-align:left&quot;&gt;1. Chunks d'environ 400 caractères, ou taille mesurée en tokens : au-delà de 128 tokens, MiniLM ignore la fin.&lt;br&gt;2. Retirer les sections de fin vides (« Liens externes », « Notes et références »).&lt;br&gt;3. Garder le titre de section avec son paragraphe ; fusionner les blocs de moins de 100 caractères.&lt;br&gt;4. Questions de test prises dans les groupes de la carte (Égypte, linguistique, informatique), jamais sur une date.&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=6;fontSize=12;spacing=12;fillColor=#FCFCFB;strokeColor=#EB6834;dashed=1;fontColor=#0B0B0B;align=center;verticalAlign=top;" vertex="1" parent="lane_off">
+          <mxGeometry x="30" y="270" width="850" height="135" as="geometry" />
+        </mxCell>
+
+        <!-- ===================== Couloir 2 : requête en ligne ===================== -->
+        <mxCell id="lane_on" value="EN LIGNE : à chaque question" style="swimlane;html=1;startSize=32;horizontal=1;fillColor=#F9F9F7;swimlaneFillColor=#FCFCFB;strokeColor=#C3C2B7;fontColor=#0B0B0B;fontStyle=1;fontSize=14;align=left;spacingLeft=12;rounded=1;arcSize=3;" vertex="1" parent="1">
+          <mxGeometry x="20" y="500" width="1580" height="330" as="geometry" />
+        </mxCell>
+
+        <mxCell id="q" value="&lt;b&gt;Question&lt;/b&gt;&lt;br&gt;« Qui est le dieu Atoum ? »" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;spacing=8;fillColor=#F0EFEC;strokeColor=#898781;fontColor=#0B0B0B;" vertex="1" parent="lane_on">
+          <mxGeometry x="30" y="130" width="190" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="s_tfidf" value="&lt;b&gt;vectorizer.transform(q)&lt;/b&gt;&lt;br&gt;cosinus avec l'index 2.1&lt;br&gt;→ s_TFIDF (N scores)" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;spacing=8;fillColor=#E0F4EC;strokeColor=#1BAF7A;fontColor=#0B0B0B;" vertex="1" parent="lane_on">
+          <mxGeometry x="270" y="60" width="240" height="95" as="geometry" />
+        </mxCell>
+
+        <mxCell id="s_dense" value="&lt;b&gt;model.encode(q)&lt;/b&gt;&lt;br&gt;cosinus avec l'index 2.2&lt;br&gt;→ s_Dense (N scores)" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;spacing=8;fillColor=#E0F4EC;strokeColor=#1BAF7A;fontColor=#0B0B0B;" vertex="1" parent="lane_on">
+          <mxGeometry x="270" y="195" width="240" height="95" as="geometry" />
+        </mxCell>
+
+        <mxCell id="norm" value="&lt;b&gt;Normalisation min-max&lt;/b&gt;&lt;br&gt;s' = (s − min) / (max − min)&lt;br&gt;chaque score ramené dans [0, 1]" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;spacing=8;fillColor=#E0F4EC;strokeColor=#1BAF7A;fontColor=#0B0B0B;" vertex="1" parent="lane_on">
+          <mxGeometry x="560" y="125" width="240" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="hyb" value="&lt;b&gt;PARTIE 2.3 : hybride&lt;/b&gt;&lt;br&gt;score = α · s'_Dense + (1 − α) · s'_TFIDF&lt;br&gt;→ top-k chunks" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;spacing=8;fillColor=#E3EEFB;strokeColor=#2A78D6;fontColor=#0B0B0B;" vertex="1" parent="lane_on">
+          <mxGeometry x="850" y="120" width="260" height="110" as="geometry" />
+        </mxCell>
+
+        <mxCell id="prompt" value="&lt;b&gt;PARTIE 3.2 : prompt&lt;/b&gt;&lt;br&gt;consignes strictes&lt;br&gt;Documents : {context}&lt;br&gt;Question : {question}" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;spacing=8;fillColor=#E3EEFB;strokeColor=#2A78D6;fontColor=#0B0B0B;" vertex="1" parent="lane_on">
+          <mxGeometry x="1160" y="110" width="180" height="130" as="geometry" />
+        </mxCell>
+
+        <mxCell id="llm" value="&lt;b&gt;PARTIES 3.1 et 3.3&lt;/b&gt;&lt;br&gt;Qwen2.5-1.5B-Instruct&lt;br&gt;sur GPU T4&lt;br&gt;→ réponse" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;spacing=8;fillColor=#ECE9FB;strokeColor=#6250D6;fontColor=#0B0B0B;" vertex="1" parent="lane_on">
+          <mxGeometry x="1380" y="110" width="170" height="130" as="geometry" />
+        </mxCell>
+
+        <!-- ===================== Flèches ===================== -->
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#52514E;strokeWidth=1.5;" edge="1" parent="1" source="n_hf" target="n_filtre">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#52514E;strokeWidth=1.5;" edge="1" parent="1" source="n_filtre" target="n_etape0">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#52514E;strokeWidth=1.5;" edge="1" parent="1" source="n_etape0" target="n_chunk">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#52514E;strokeWidth=1.5;" edge="1" parent="1" source="n_chunk" target="n_chunks">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" value="fit" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#52514E;strokeWidth=1.5;fontSize=11;fontColor=#52514E;labelBackgroundColor=#FCFCFB;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="n_chunks" target="n_tfidf">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" value="encode" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#52514E;strokeWidth=1.5;fontSize=11;fontColor=#52514E;labelBackgroundColor=#FCFCFB;" edge="1" parent="1" source="n_chunks" target="n_dense">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#52514E;strokeWidth=1.5;" edge="1" parent="1" source="q" target="s_tfidf">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#52514E;strokeWidth=1.5;" edge="1" parent="1" source="q" target="s_dense">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#52514E;strokeWidth=1.5;" edge="1" parent="1" source="s_tfidf" target="norm">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#52514E;strokeWidth=1.5;" edge="1" parent="1" source="s_dense" target="norm">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#52514E;strokeWidth=1.5;" edge="1" parent="1" source="norm" target="hyb">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" value="context" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#52514E;strokeWidth=1.5;fontSize=11;fontColor=#52514E;labelBackgroundColor=#FCFCFB;" edge="1" parent="1" source="hyb" target="prompt">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#52514E;strokeWidth=1.5;" edge="1" parent="1" source="prompt" target="llm">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ===================== Légende ===================== -->
+        <mxCell id="legende" value="&lt;span style=&quot;color:#898781&quot;&gt;■&lt;/span&gt; données   &lt;span style=&quot;color:#EB6834&quot;&gt;■&lt;/span&gt; étape en cours   &lt;span style=&quot;color:#2A78D6&quot;&gt;■&lt;/span&gt; questions du TP   &lt;span style=&quot;color:#1BAF7A&quot;&gt;■&lt;/span&gt; calcul de scores   &lt;span style=&quot;color:#6250D6&quot;&gt;■&lt;/span&gt; génération" style="text;html=1;align=left;verticalAlign=middle;fontSize=12;fontColor=#52514E;" vertex="1" parent="1">
+          <mxGeometry x="30" y="840" width="900" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

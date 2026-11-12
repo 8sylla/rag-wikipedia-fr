@@ -1,0 +1,122 @@
+<mxfile host="app.diagrams.net" version="24.7.17">
+  <diagram id="retrieval" name="Partie 2 - retrieval">
+    <mxGraphModel dx="1600" dy="1100" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1640" pageHeight="1120" background="#FCFCFB" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ============ Entrées ============ -->
+        <mxCell id="chunks" value="&lt;b&gt;10 926 chunks&lt;/b&gt; (partie 1)&lt;br&gt;texte indexé = « &lt;b&gt;titre&lt;/b&gt; : texte du chunk »&lt;br&gt;&lt;i&gt;90 tokens en médiane, 0 % au-delà de 128&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fontSize=12;spacing=8;fillColor=#F0EFEC;strokeColor=#898781;fontColor=#0B0B0B;" vertex="1" parent="1">
+          <mxGeometry x="560" y="20" width="420" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="question" value="&lt;b&gt;question q&lt;/b&gt;&lt;br&gt;« Qui a dirigé la thèse de Jean Paulhan ? »" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fontSize=12;spacing=8;fillColor=#F0EFEC;strokeColor=#898781;fontColor=#0B0B0B;" vertex="1" parent="1">
+          <mxGeometry x="640" y="345" width="260" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- ============ 2.1 TF-IDF ============ -->
+        <mxCell id="laneT" value="2.1 INDEX LEXICAL : TF-IDF (vecteurs creux)" style="swimlane;html=1;startSize=32;fillColor=#E3EEFB;swimlaneFillColor=#FCFCFB;strokeColor=#2A78D6;fontColor=#0B0B0B;fontStyle=1;fontSize=13;align=left;spacingLeft=12;rounded=1;arcSize=3;" vertex="1" parent="1">
+          <mxGeometry x="20" y="130" width="560" height="560" as="geometry" />
+        </mxCell>
+        <mxCell id="t1" value="&lt;b&gt;Prétraitement&lt;/b&gt;&lt;br&gt;minuscules · accents retirés · mots vides FR&lt;br&gt;mots de 2 caractères ou plus, chiffres gardés" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;spacing=6;fillColor=#FFFFFF;strokeColor=#2A78D6;fontColor=#0B0B0B;" vertex="1" parent="laneT">
+          <mxGeometry x="20" y="50" width="520" height="66" as="geometry" />
+        </mxCell>
+        <mxCell id="t2" value="&lt;b&gt;Pondération&lt;/b&gt;&lt;br&gt;tfidf(t, c) = (1 + ln tf) × idf(t)&lt;br&gt;idf(t) =ln((1 + N) / (1 + n&lt;sub&gt;t&lt;/sub&gt;)) + 1&lt;br&gt;puis chaque ligne est normée (L2)" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;spacing=6;fillColor=#FFFFFF;strokeColor=#2A78D6;fontColor=#0B0B0B;" vertex="1" parent="laneT">
+          <mxGeometry x="20" y="126" width="520" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="t3" value="&lt;b&gt;X : N × V creuse&lt;/b&gt;&lt;br&gt;10 926 × 47 867, densité 0,05 %&lt;br&gt;&lt;i&gt;fit en 1 s&lt;/i&gt;" style="shape=table;html=1;whiteSpace=wrap;startSize=0;container=0;collapsible=0;childLayout=tableLayout;fontSize=12;fillColor=#CDE2FB;strokeColor=#2A78D6;fontColor=#0B0B0B;rounded=0;" vertex="1" parent="laneT">
+          <mxGeometry x="20" y="215" width="250" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="t4" value="&lt;b&gt;vectorizer.transform(q)&lt;/b&gt;&lt;br&gt;même vocabulaire, même IDF : &lt;b&gt;pas de fit&lt;/b&gt;&lt;br&gt;poids : paulhan 0,65 · these 0,50 · dirige 0,47 · jean 0,32" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;spacing=6;fillColor=#FFFFFF;strokeColor=#2A78D6;fontColor=#0B0B0B;" vertex="1" parent="laneT">
+          <mxGeometry x="290" y="215" width="250" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="t5" value="&lt;b&gt;s_TFIDF = X · q&lt;/b&gt;  (cosinus, lignes normées)&lt;br&gt;N scores, &lt;b&gt;97 % nuls&lt;/b&gt; : aucun mot en commun" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;spacing=6;fillColor=#CDE2FB;strokeColor=#2A78D6;fontColor=#0B0B0B;" vertex="1" parent="laneT">
+          <mxGeometry x="20" y="315" width="520" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="t6" value="&lt;b&gt;+&lt;/b&gt; nom propre rare, sigle, nombre exact (Paulhan → Meillet, rang 1)&lt;br&gt;&lt;b&gt;−&lt;/b&gt; synonymes et reformulations : aucun mot commun, score nul&lt;br&gt;&lt;b&gt;−&lt;/b&gt; un mot isolé peut suffire à remonter un hors-sujet (Telmex)" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;spacing=8;fillColor=#FCFCFB;strokeColor=#2A78D6;dashed=1;fontColor=#0B0B0B;align=left;" vertex="1" parent="laneT">
+          <mxGeometry x="20" y="395" width="520" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="t7" value="MRR 0,94 · lexicales 0,98 · paraphrasées 0,90" style="text;html=1;fontSize=12;fontStyle=1;fontColor=#2A78D6;align=left;verticalAlign=middle;" vertex="1" parent="laneT">
+          <mxGeometry x="20" y="495" width="520" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- ============ 2.2 Dense ============ -->
+        <mxCell id="laneD" value="2.2 INDEX SÉMANTIQUE : MiniLM multilingue (vecteurs denses)" style="swimlane;html=1;startSize=32;fillColor=#E0F4EC;swimlaneFillColor=#FCFCFB;strokeColor=#1BAF7A;fontColor=#0B0B0B;fontStyle=1;fontSize=13;align=left;spacingLeft=12;rounded=1;arcSize=3;" vertex="1" parent="1">
+          <mxGeometry x="960" y="130" width="660" height="560" as="geometry" />
+        </mxCell>
+        <mxCell id="d1" value="&lt;b&gt;Tokenizer&lt;/b&gt; SentencePiece (250 002 sous-mots) → au plus &lt;b&gt;128 tokens&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;spacing=6;fillColor=#FFFFFF;strokeColor=#1BAF7A;fontColor=#0B0B0B;" vertex="1" parent="laneD">
+          <mxGeometry x="20" y="50" width="400" height="46" as="geometry" />
+        </mxCell>
+        <mxCell id="d2" value="&lt;b&gt;Transformer&lt;/b&gt; 12 couches → h&lt;sub&gt;1&lt;/sub&gt; … h&lt;sub&gt;n&lt;/sub&gt; ∈ ℝ&lt;sup&gt;384&lt;/sup&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;spacing=6;fillColor=#FFFFFF;strokeColor=#1BAF7A;fontColor=#0B0B0B;" vertex="1" parent="laneD">
+          <mxGeometry x="20" y="108" width="400" height="46" as="geometry" />
+        </mxCell>
+        <mxCell id="d3" value="&lt;b&gt;Mean pooling&lt;/b&gt; e = (1/n) Σ h&lt;sub&gt;i&lt;/sub&gt; → normalisation L2" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;spacing=6;fillColor=#FFFFFF;strokeColor=#1BAF7A;fontColor=#0B0B0B;" vertex="1" parent="laneD">
+          <mxGeometry x="20" y="166" width="400" height="46" as="geometry" />
+        </mxCell>
+        <mxCell id="d_train" value="&lt;b&gt;Entraînement&lt;/b&gt;&lt;br&gt;1. professeur anglais : perte &lt;b&gt;contrastive&lt;/b&gt; sur des paires de paraphrases, négatifs dans le batch&lt;br&gt;2. élève multilingue : &lt;b&gt;distillation&lt;/b&gt;, la traduction doit tomber sur le vecteur du professeur" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=11;spacing=6;fillColor=#FCFCFB;strokeColor=#1BAF7A;dashed=1;fontColor=#0B0B0B;align=left;" vertex="1" parent="laneD">
+          <mxGeometry x="440" y="50" width="200" height="162" as="geometry" />
+        </mxCell>
+        <mxCell id="d4" value="&lt;b&gt;E : N × 384 dense&lt;/b&gt;&lt;br&gt;10 926 × 384, environ 16 Mo&lt;br&gt;&lt;i&gt;encodage : 5 min sur CPU, quelques s sur T4&lt;/i&gt;" style="shape=table;html=1;whiteSpace=wrap;startSize=0;container=0;collapsible=0;childLayout=tableLayout;fontSize=12;fillColor=#C9EEDD;strokeColor=#1BAF7A;fontColor=#0B0B0B;rounded=0;" vertex="1" parent="laneD">
+          <mxGeometry x="340" y="225" width="300" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="d5" value="&lt;b&gt;encodeur.encode(q)&lt;/b&gt;&lt;br&gt;même modèle, même pooling" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;spacing=6;fillColor=#FFFFFF;strokeColor=#1BAF7A;fontColor=#0B0B0B;" vertex="1" parent="laneD">
+          <mxGeometry x="20" y="225" width="300" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="d6" value="&lt;b&gt;s_Dense = E · q&lt;/b&gt;  (cosinus, vecteurs unitaires)&lt;br&gt;N scores en cloche autour de 0,1, &lt;b&gt;jamais nuls&lt;/b&gt;, de −0,2 à 0,65" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;spacing=6;fillColor=#C9EEDD;strokeColor=#1BAF7A;fontColor=#0B0B0B;" vertex="1" parent="laneD">
+          <mxGeometry x="20" y="315" width="620" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="d7" value="&lt;b&gt;+&lt;/b&gt; comprend le thème sans mot commun (sel → Halophile, rangs 1, 2 et 4)&lt;br&gt;&lt;b&gt;−&lt;/b&gt; nom rare noyé dans la moyenne (Paulhan → pages d'années)&lt;br&gt;&lt;b&gt;−&lt;/b&gt; modèle de paraphrase, pas de recherche question → passage" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;spacing=8;fillColor=#FCFCFB;strokeColor=#1BAF7A;dashed=1;fontColor=#0B0B0B;align=left;" vertex="1" parent="laneD">
+          <mxGeometry x="20" y="395" width="620" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="d8" value="MRR 0,75 · lexicales 0,82 · paraphrasées 0,67" style="text;html=1;fontSize=12;fontStyle=1;fontColor=#14805A;align=left;verticalAlign=middle;" vertex="1" parent="laneD">
+          <mxGeometry x="20" y="495" width="620" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- ============ 2.3 Fusion ============ -->
+        <mxCell id="laneH" value="2.3 FUSION HYBRIDE" style="swimlane;html=1;startSize=32;fillColor=#FCE6DC;swimlaneFillColor=#FCFCFB;strokeColor=#EB6834;fontColor=#0B0B0B;fontStyle=1;fontSize=13;align=left;spacingLeft=12;rounded=1;arcSize=3;" vertex="1" parent="1">
+          <mxGeometry x="20" y="740" width="1600" height="270" as="geometry" />
+        </mxCell>
+        <mxCell id="h1" value="&lt;b&gt;min-max&lt;/b&gt; de s_TFIDF et de s_Dense&lt;br&gt;s' = (s − min) / (max − min)&lt;br&gt;sur les N chunks, pour cette question" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;spacing=6;fillColor=#FFFFFF;strokeColor=#EB6834;fontColor=#0B0B0B;" vertex="1" parent="laneH">
+          <mxGeometry x="20" y="55" width="300" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="h2" value="&lt;b&gt;score = α · s'_Dense + (1 − α) · s'_TFIDF&lt;/b&gt;&lt;br&gt;α = 0 : TF-IDF seul · α = 1 : dense seul" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=13;spacing=6;fillColor=#FCE6DC;strokeColor=#EB6834;strokeWidth=2;fontColor=#0B0B0B;" vertex="1" parent="laneH">
+          <mxGeometry x="360" y="55" width="420" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="h3" value="&lt;b&gt;top-k&lt;/b&gt;&lt;br&gt;argpartition O(N)&lt;br&gt;→ partie 3 (contexte du LLM)" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;spacing=6;fillColor=#FFFFFF;strokeColor=#EB6834;fontColor=#0B0B0B;" vertex="1" parent="laneH">
+          <mxGeometry x="820" y="55" width="240" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="h4" value="&lt;b&gt;Alternative : Reciprocal Rank Fusion&lt;/b&gt;&lt;br&gt;score = Σ 1 / (60 + rang)&lt;br&gt;pas de normalisation, mais poids égaux : MRR 0,87" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;spacing=6;fillColor=#FCFCFB;strokeColor=#EB6834;dashed=1;fontColor=#0B0B0B;" vertex="1" parent="laneH">
+          <mxGeometry x="1100" y="55" width="480" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="h5" value="&lt;b&gt;Évaluation sur 56 questions&lt;/b&gt; (28 articles × une question lexicale et une paraphrasée), MRR et Recall@k comme au TP 3&lt;br&gt;hybride α = 0,5 : &lt;b&gt;MRR 0,95&lt;/b&gt; (paraphrasées 0,91) · courbe plate pour α de 0 à 0,6 : un écart de 0,001 n'est que du bruit (1 question = 0,018)&lt;br&gt;préfixe de titre : TF-IDF 0,91 → 0,94 · dense 0,69 → 0,75 · hybride 0,91 → 0,95" style="rounded=1;whiteSpace=wrap;html=1;arcSize=6;fontSize=12;spacing=10;fillColor=#FFFFFF;strokeColor=#52514E;fontColor=#0B0B0B;align=left;" vertex="1" parent="laneH">
+          <mxGeometry x="20" y="160" width="1560" height="85" as="geometry" />
+        </mxCell>
+
+        <!-- ============ Flèches ============ -->
+        <mxCell id="e1" value="fit_transform" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#2A78D6;strokeWidth=1.5;fontSize=11;fontColor=#52514E;labelBackgroundColor=#FCFCFB;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="chunks" target="laneT">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" value="encode" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#1BAF7A;strokeWidth=1.5;fontSize=11;fontColor=#52514E;labelBackgroundColor=#FCFCFB;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="chunks" target="laneD">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#2A78D6;strokeWidth=1.5;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="question" target="t4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#1BAF7A;strokeWidth=1.5;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="question" target="d5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" value="s_TFIDF" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#2A78D6;strokeWidth=1.5;fontSize=11;fontColor=#52514E;labelBackgroundColor=#FCFCFB;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.18;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="laneT" target="laneH">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" value="s_Dense" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#1BAF7A;strokeWidth=1.5;fontSize=11;fontColor=#52514E;labelBackgroundColor=#FCFCFB;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.8;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="laneD" target="laneH">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#52514E;strokeWidth=1.5;" edge="1" parent="1" source="h1" target="h2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#52514E;strokeWidth=1.5;" edge="1" parent="1" source="h2" target="h3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,15 @@
+# Testé avec Python 3.11 et les versions indiquées dans le README.
+# Sur Colab, seules datasets, sentence-transformers et langchain-text-splitters sont à installer
+# (la première cellule du notebook s'en charge).
+datasets
+pandas
+numpy
+pyarrow
+scikit-learn
+matplotlib
+torch
+transformers
+sentence-transformers
+langchain-text-splitters
+huggingface-hub
+ipykernel

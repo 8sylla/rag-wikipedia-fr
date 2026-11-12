@@ -1,0 +1,92 @@
+<mxfile host="app.diagrams.net" version="24.7.17">
+  <diagram id="generation" name="Partie 3 - generation">
+    <mxGraphModel dx="1600" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1640" pageHeight="1000" background="#FCFCFB" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ============ Ligne 1 : recherche ============ -->
+        <mxCell id="q" value="&lt;b&gt;question&lt;/b&gt;&lt;br&gt;« Qui a dirigé la thèse&lt;br&gt;de Jean Paulhan ? »" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fontSize=12;spacing=8;fillColor=#F0EFEC;strokeColor=#898781;fontColor=#0B0B0B;" vertex="1" parent="1">
+          <mxGeometry x="20" y="40" width="200" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="search" value="&lt;b&gt;1. search_hybrid&lt;/b&gt;&lt;br&gt;k = 5, α = 0,5&lt;br&gt;(partie 2)" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fontSize=12;spacing=8;fillColor=#FCE6DC;strokeColor=#EB6834;fontColor=#0B0B0B;" vertex="1" parent="1">
+          <mxGeometry x="270" y="40" width="190" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="ctx" value="&lt;b&gt;2. context = formater_contexte()&lt;/b&gt;&lt;div style=&quot;text-align:left&quot;&gt;[1] Antoine Meillet&lt;br&gt;Il a formé toute une génération de linguistes…&lt;br&gt;[2] James Henry Breasted …&lt;br&gt;… [5]&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=6;fontSize=12;spacing=8;fillColor=#FFFFFF;strokeColor=#898781;fontColor=#0B0B0B;" vertex="1" parent="1">
+          <mxGeometry x="510" y="25" width="330" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="e_q" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#52514E;strokeWidth=1.5;" edge="1" parent="1" source="q" target="search">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_s" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#52514E;strokeWidth=1.5;" edge="1" parent="1" source="search" target="ctx">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ============ Le prompt (chat template) ============ -->
+        <mxCell id="laneP" value="3. PROMPT : apply_chat_template (jetons spéciaux de Qwen)" style="swimlane;html=1;startSize=32;fillColor=#E3EEFB;swimlaneFillColor=#FCFCFB;strokeColor=#2A78D6;fontColor=#0B0B0B;fontStyle=1;fontSize=13;align=left;spacingLeft=12;rounded=1;arcSize=3;" vertex="1" parent="1">
+          <mxGeometry x="20" y="180" width="820" height="470" as="geometry" />
+        </mxCell>
+        <mxCell id="p_sys" value="&lt;b&gt;&amp;lt;|im_start|&amp;gt;system&lt;/b&gt;&lt;br&gt;Tu es un assistant qui répond à partir d'extraits de Wikipédia en français. Règles :&lt;br&gt;1. Utilise uniquement les documents fournis, jamais tes connaissances personnelles.&lt;br&gt;2. Sinon, réponds exactement : « Je ne trouve pas la réponse dans les documents fournis. »&lt;br&gt;3. Cite le numéro du document entre crochets, par exemple [2].&lt;br&gt;4. Réponds en français, en une à trois phrases.&lt;br&gt;&lt;b&gt;&amp;lt;|im_end|&amp;gt;&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=4;fontSize=12;spacing=10;fillColor=#FFFFFF;strokeColor=#2A78D6;fontColor=#0B0B0B;align=left;fontFamily=Helvetica;" vertex="1" parent="laneP">
+          <mxGeometry x="20" y="50" width="780" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="p_user" value="&lt;b&gt;&amp;lt;|im_start|&amp;gt;user&lt;/b&gt;&lt;br&gt;Documents :&lt;br&gt;[1] Antoine Meillet · texte du chunk&lt;br&gt;[2] … [5] …&lt;br&gt;&lt;br&gt;Question : Qui a dirigé la thèse de Jean Paulhan ?&lt;br&gt;&lt;b&gt;&amp;lt;|im_end|&amp;gt;&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;arcSize=4;fontSize=12;spacing=10;fillColor=#FFFFFF;strokeColor=#2A78D6;fontColor=#0B0B0B;align=left;" vertex="1" parent="laneP">
+          <mxGeometry x="20" y="215" width="780" height="135" as="geometry" />
+        </mxCell>
+        <mxCell id="p_asst" value="&lt;b&gt;&amp;lt;|im_start|&amp;gt;assistant&lt;/b&gt;  ← add_generation_prompt=True : le modèle écrit à partir d'ici" style="rounded=1;whiteSpace=wrap;html=1;arcSize=4;fontSize=12;spacing=10;fillColor=#CDE2FB;strokeColor=#2A78D6;fontColor=#0B0B0B;align=left;" vertex="1" parent="laneP">
+          <mxGeometry x="20" y="365" width="780" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p_tok" value="prompt final : 400 à 700 tokens avec 5 chunks, sur les 32 768 du contexte de Qwen : la marge est large" style="text;html=1;fontSize=12;fontStyle=2;fontColor=#52514E;align=left;verticalAlign=middle;" vertex="1" parent="laneP">
+          <mxGeometry x="20" y="415" width="780" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="e_ctx" value="GABARIT.format(context, question)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#52514E;strokeWidth=1.5;fontSize=11;fontColor=#52514E;labelBackgroundColor=#FCFCFB;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.82;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="ctx" target="laneP">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ============ Le modèle ============ -->
+        <mxCell id="laneM" value="4. GÉNÉRATION : Qwen2.5-1.5B-Instruct" style="swimlane;html=1;startSize=32;fillColor=#ECE9FB;swimlaneFillColor=#FCFCFB;strokeColor=#6250D6;fontColor=#0B0B0B;fontStyle=1;fontSize=13;align=left;spacingLeft=12;rounded=1;arcSize=3;" vertex="1" parent="1">
+          <mxGeometry x="910" y="20" width="710" height="630" as="geometry" />
+        </mxCell>
+        <mxCell id="m_arch" value="&lt;b&gt;Décodeur Transformer&lt;/b&gt; · 1,54 milliard de paramètres · 28 couches&lt;br&gt;attention causale (un token ne voit que ceux qui le précèdent)&lt;br&gt;GQA : 12 têtes de requête, 2 têtes clé/valeur · contexte de 32 768 tokens&lt;br&gt;float16 sur T4 (≈ 3,1 Go) · float32 sur CPU (≈ 6,2 Go)" style="rounded=1;whiteSpace=wrap;html=1;arcSize=6;fontSize=12;spacing=8;fillColor=#FFFFFF;strokeColor=#6250D6;fontColor=#0B0B0B;" vertex="1" parent="laneM">
+          <mxGeometry x="20" y="50" width="670" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="m_prefill" value="&lt;b&gt;Lecture du prompt&lt;/b&gt; (en parallèle)&lt;br&gt;calcule et garde en cache les clés/valeurs de chaque token" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;spacing=6;fillColor=#FFFFFF;strokeColor=#6250D6;fontColor=#0B0B0B;" vertex="1" parent="laneM">
+          <mxGeometry x="20" y="165" width="320" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="m_loop" value="&lt;b&gt;Boucle autorégressive&lt;/b&gt;&lt;br&gt;p(x&lt;sub&gt;t&lt;/sub&gt; | x&lt;sub&gt;1&lt;/sub&gt; … x&lt;sub&gt;t−1&lt;/sub&gt;) sur un vocabulaire de 151 936 tokens&lt;br&gt;&lt;b&gt;glouton&lt;/b&gt; : x&lt;sub&gt;t&lt;/sub&gt; = argmax (do_sample=False)&lt;br&gt;pénalité de répétition 1,05&lt;br&gt;on ajoute x&lt;sub&gt;t&lt;/sub&gt; et on recommence" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fontSize=12;spacing=6;fillColor=#ECE9FB;strokeColor=#6250D6;strokeWidth=2;fontColor=#0B0B0B;" vertex="1" parent="laneM">
+          <mxGeometry x="370" y="165" width="320" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="m_stop" value="arrêt : &amp;lt;|im_end|&amp;gt; ou 200 nouveaux tokens" style="rounded=1;whiteSpace=wrap;html=1;arcSize=20;fontSize=11;fillColor=#FCFCFB;strokeColor=#6250D6;dashed=1;fontColor=#52514E;" vertex="1" parent="laneM">
+          <mxGeometry x="370" y="300" width="320" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="e_pf" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#6250D6;strokeWidth=1.5;" edge="1" parent="laneM" source="m_prefill" target="m_loop">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_loop" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#6250D6;strokeWidth=1.5;exitX=1;exitY=0.75;exitDx=0;exitDy=0;entryX=1;entryY=0.25;entryDx=0;entryDy=0;" edge="1" parent="laneM" source="m_loop" target="m_loop">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="705" y="255" />
+              <mxPoint x="705" y="195" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m_out" value="&lt;b&gt;Réponse&lt;/b&gt; : « Antoine Meillet a dirigé la thèse de Jean Paulhan sur la sémantique du proverbe. » (27 tokens, 13 s sur CPU)&lt;br&gt;&lt;b&gt;Vérifications automatiques&lt;/b&gt; : comportement attendu (la réponse si elle est dans l&#39;index, sinon le refus) · citation [n] · nombre absent des documents fournis" style="rounded=1;whiteSpace=wrap;html=1;arcSize=6;fontSize=12;spacing=10;fillColor=#E0F4EC;strokeColor=#1BAF7A;strokeWidth=2;fontColor=#0B0B0B;align=left;" vertex="1" parent="laneM">
+          <mxGeometry x="20" y="360" width="670" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="e_out" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#52514E;strokeWidth=1.5;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="laneM" source="m_stop" target="m_out">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="m_mem" value="&lt;b&gt;Mémoire paramétrique contre mémoire contextuelle&lt;/b&gt;&lt;br&gt;Même modèle sans recherche : « Jean Paulhan a dirigé sa propre thèse » · « FUD : False Usability Demonstration » · « le fleuve Victoria » : des hallucinations assurées.&lt;br&gt;Avec le RAG : 6/6 sur les questions factuelles, refus sur la question hors corpus (France 2018)." style="rounded=1;whiteSpace=wrap;html=1;arcSize=6;fontSize=12;spacing=10;fillColor=#FCFCFB;strokeColor=#6250D6;dashed=1;fontColor=#0B0B0B;align=left;" vertex="1" parent="laneM">
+          <mxGeometry x="20" y="490" width="670" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="e_prompt" value="prompt" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;strokeColor=#52514E;strokeWidth=1.5;fontSize=11;fontColor=#52514E;labelBackgroundColor=#FCFCFB;exitX=1;exitY=0.25;exitDx=0;exitDy=0;" edge="1" parent="1" source="laneP" target="m_prefill">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ============ Résultats ============ -->
+        <mxCell id="res" value="&lt;b&gt;Tests : 10 questions&lt;/b&gt; (6 factuelles, 3 dates de personnes, 1 hors corpus), comportement attendu sur 10&lt;br&gt;&lt;b&gt;A&lt;/b&gt; · prompt v1, index v1 : &lt;b&gt;7/10&lt;/b&gt;. Trois dates absentes des documents sont données quand même : Meillet 1866 (juste par chance), Martinet 1970 (faux), Tito 1945 (faux, avec une citation [2] qui ne contient pas la date).&lt;br&gt;&lt;b&gt;B&lt;/b&gt; · prompt v1, index v2 = index v1 + 154 fiches tirées des catégories « Naissance en … / Décès en … » : &lt;b&gt;10/10&lt;/b&gt;, aucun nombre non appuyé.&lt;br&gt;&lt;b&gt;C&lt;/b&gt; · prompt v2 (deux exemples et un rappel après les documents), index v2 : &lt;b&gt;8/10&lt;/b&gt;. Plus de citations, mais deux refus à tort : plus de fidélité, moins de rappel." style="rounded=1;whiteSpace=wrap;html=1;arcSize=4;fontSize=12;spacing=12;fillColor=#FFFFFF;strokeColor=#52514E;fontColor=#0B0B0B;align=left;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="20" y="680" width="1600" height="105" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,7 @@
+# Environnement Python local
+.venv/
+__pycache__/
+.ipynb_checkpoints/
+
+# Données recréées par le notebook (corpus téléchargé, embeddings en cache, environ 35 Mo)
+data/
