@@ -10,6 +10,8 @@ Ce système répond à des questions sur 1 000 articles de Wikipédia en frança
 | Recherche | TF-IDF + `paraphrase-multilingual-MiniLM-L12-v2`, fusion hybride : **MRR 0,95** sur 56 questions de test |
 | Génération | `Qwen2.5-1.5B-Instruct` : **10 réponses attendues sur 10** après correction des données |
 
+Rendu final : [présentation en 6 diapositives](rendu/Sylla_Nfaly_RAG_presentation.pdf) et [rapport d'une page](rendu/Sylla_Nfaly_RAG_rapport.pdf).
+
 ![Pipeline complet](diagrams/00_pipeline_rag.png)
 
 ## Contenu du dépôt
@@ -20,6 +22,7 @@ Ce système répond à des questions sur 1 000 articles de Wikipédia en frança
 | `figures/` | Les graphiques produits par le notebook (exploration, comparaison des découpages, choix de α) |
 | `figures/08_chunks_cote_a_cote.html` | Lecture côte à côte des chunks de deux articles, à ouvrir dans un navigateur après avoir cloné le dépôt |
 | `diagrams/` | Un schéma par partie, au format draw.io (modifiable) et PNG |
+| `rendu/` | La présentation et le rapport d'une page du rendu final (PDF) |
 | `requirements.txt` | Les bibliothèques nécessaires |
 
 Le dossier `data/` n'est pas versionné. Le notebook le recrée : il y enregistre le corpus téléchargé et le cache des embeddings.
