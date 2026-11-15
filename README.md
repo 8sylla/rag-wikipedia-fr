@@ -26,22 +26,50 @@ Le dossier `data/` n'est pas versionné. Le notebook le recrée : il y enregistr
 
 ## Lancer le notebook
 
-### Sur Google Colab (recommandé)
+J'ai exécuté le notebook en local, dans un environnement Python installé à partir de `requirements.txt` : les sorties enregistrées viennent de cette exécution. Le notebook fonctionne aussi tel quel sur Google Colab. Je suis passé en local parce que Colab devenait instable sur les étapes les plus lourdes, l'encodage complet du corpus et le chargement de Qwen.
 
-1. *Fichier* → *Importer le notebook*, puis choisir `SYLLA_NFALY_RAG_indexation.ipynb`.
-2. *Exécution* → *Modifier le type d'exécution* → **GPU T4**.
-3. *Exécution* → *Tout exécuter*. La première cellule de code installe les trois bibliothèques que Colab n'a pas toujours.
-
-Le notebook détecte le GPU tout seul. L'encodeur et Qwen tournent alors sur la T4, et Qwen y est chargé en float16 (environ 3,1 Go).
-
-### En local
+### En local (l'environnement des sorties enregistrées)
 
 ```bash
 python -m venv .venv
 .venv/bin/pip install -r requirements.txt   # sous Windows : .venv\Scripts\pip
 ```
 
-Ouvre ensuite le notebook avec Jupyter ou VS Code. Sans GPU, tout fonctionne mais lentement : Qwen tourne en float32 (6,2 Go de RAM), chaque encodage complet du corpus prend environ 5 minutes et chaque réponse de 10 à 40 secondes. Les sorties enregistrées dans le notebook ont été obtenues ainsi, sur CPU.
+Ouvrez ensuite le notebook avec Jupyter ou VS Code. Sans GPU, tout fonctionne mais lentement : Qwen tourne en float32 (6,2 Go de RAM), chaque encodage complet du corpus prend environ 5 minutes et chaque réponse de 10 à 40 secondes.
+
+### Sur Google Colab
+
+1. Menu *Fichier*, *Importer le notebook*, puis choisir `SYLLA_NFALY_RAG_indexation.ipynb`.
+2. Menu *Exécution*, *Modifier le type d'exécution*, puis **GPU T4**.
+3. Menu *Exécution*, *Tout exécuter*. La première cellule de code installe les trois bibliothèques que Colab n'a pas toujours.
+
+Le notebook détecte le GPU tout seul. L'encodeur et Qwen tournent alors sur la T4, et Qwen y est chargé en float16 (environ 3,1 Go).
+
+## Schémas et figures d'analyse
+
+Les schémas résument chaque partie. Les fichiers `.drawio` s'ouvrent et se modifient dans [diagrams.net](https://app.diagrams.net).
+
+| Schéma | Image | Source modifiable |
+|---|---|---|
+| Pipeline complet, de l'exploration à la réponse | [00_pipeline_rag.png](diagrams/00_pipeline_rag.png) | [00_pipeline_rag.drawio](diagrams/00_pipeline_rag.drawio) ([ouvrir dans diagrams.net](https://app.diagrams.net/#Uhttps%3A%2F%2Fraw.githubusercontent.com%2F8sylla%2Frag-wikipedia-fr%2Fmain%2Fdiagrams%2F00_pipeline_rag.drawio)) |
+| Partie 1 : découpage fixe et récursif | [01_chunking.png](diagrams/01_chunking.png) | [01_chunking.drawio](diagrams/01_chunking.drawio) ([ouvrir dans diagrams.net](https://app.diagrams.net/#Uhttps%3A%2F%2Fraw.githubusercontent.com%2F8sylla%2Frag-wikipedia-fr%2Fmain%2Fdiagrams%2F01_chunking.drawio)) |
+| Partie 2 : TF-IDF, dense et hybride | [02_retrieval.png](diagrams/02_retrieval.png) | [02_retrieval.drawio](diagrams/02_retrieval.drawio) ([ouvrir dans diagrams.net](https://app.diagrams.net/#Uhttps%3A%2F%2Fraw.githubusercontent.com%2F8sylla%2Frag-wikipedia-fr%2Fmain%2Fdiagrams%2F02_retrieval.drawio)) |
+| Partie 3 : prompt, génération et vérifications | [03_generation.png](diagrams/03_generation.png) | [03_generation.drawio](diagrams/03_generation.drawio) ([ouvrir dans diagrams.net](https://app.diagrams.net/#Uhttps%3A%2F%2Fraw.githubusercontent.com%2F8sylla%2Frag-wikipedia-fr%2Fmain%2Fdiagrams%2F03_generation.drawio)) |
+
+Les figures d'analyse sont produites par le notebook :
+
+| Figure | Ce qu'elle montre |
+|---|---|
+| [01_filtre_longueur.png](figures/01_filtre_longueur.png) | L'effet du filtre de 200 à 900 mots sur les articles lus |
+| [02_trous_extraction.png](figures/02_trous_extraction.png) | Les dates et les siècles effacés par l'extraction du dump |
+| [03_structure_paragraphes.png](figures/03_structure_paragraphes.png) | La longueur des paragraphes et les titres de section les plus fréquents |
+| [04_types_de_pages.png](figures/04_types_de_pages.png) | Les types de pages du corpus : personnes, listes, années, divinités, lieux |
+| [05_tokens_encodeur.png](figures/05_tokens_encodeur.png) | La taille des fenêtres en tokens face à la limite de 128 tokens de l'encodeur |
+| [06_carte_sujets.png](figures/06_carte_sujets.png) | La carte des sujets du corpus (TF-IDF, SVD, k-means et t-SNE) |
+| [07_comparaison_chunking.png](figures/07_comparaison_chunking.png) | La comparaison des trois découpages |
+| [08_chunks_cote_a_cote.html](figures/08_chunks_cote_a_cote.html) | La lecture côte à côte des chunks de deux articles (à ouvrir dans un navigateur après avoir cloné le dépôt) |
+| [09_echelles_scores.png](figures/09_echelles_scores.png) | Les échelles des scores TF-IDF et denses, avant et après la normalisation min-max |
+| [10_choix_alpha.png](figures/10_choix_alpha.png) | Le MRR selon la valeur de α dans la recherche hybride |
 
 ## Démarche et résultats
 
@@ -58,7 +86,7 @@ Cette étape n'est pas demandée par l'énoncé, mais elle a fixé presque tous 
 
 Trois variantes ont été comparées. Les deux méthodes reçoivent le même texte nettoyé, sans les sections de fin vides.
 
-| | Fenêtre fixe (400 car.) | Récursif (≤ 110 tokens) | Récursif + rattachement |
+| | Fenêtre fixe (400 car.) | Récursif (110 tokens au plus) | Récursif + rattachement |
 |---|---|---|---|
 | Chunks | 9 156 | 11 861 | **10 926** |
 | Tokens (médiane) | 109 | 80 | 85 |
@@ -75,13 +103,13 @@ Le *rattachement* fusionne les chunks de moins de 30 tokens avec leur voisin. Il
 
 ### Partie 2 : indexation et recherche
 
-- **TF-IDF** : matrice creuse de 10 926 × 47 867, accents retirés, mots vides français, `sublinear_tf`.
+- **TF-IDF** : matrice creuse de 10 926 chunks sur 47 867 mots, accents retirés, mots vides français, `sublinear_tf`.
 - **Dense** : vecteurs normalisés de 384 dimensions.
-- **Hybride** : scores ramenés dans [0, 1] par min-max, puis `α · dense + (1 − α) · TF-IDF`.
+- **Hybride** : scores ramenés dans [0, 1] par min-max, puis `α * dense + (1 - α) * TF-IDF`.
 
-Chaque chunk est indexé avec le titre de son article en préfixe. Un chunk comme « Il succéda au linguiste Auguste Carrière… » ne nomme pas son sujet : le préfixe le lui rend.
+Chaque chunk est indexé avec le titre de son article en préfixe. Un chunk comme « Il succéda au linguiste Auguste Carrière » ne nomme pas son sujet : le préfixe le lui rend.
 
-Évaluation sur 56 questions (28 articles × une question **lexicale** et une **paraphrasée**), en MRR :
+Évaluation sur 56 questions, deux par article sur 28 articles : une question **lexicale** et une **paraphrasée**. Résultats en MRR :
 
 | | Lexicales | Paraphrasées | Toutes |
 |---|---|---|---|
@@ -115,7 +143,7 @@ Dix questions de test : six factuelles, trois dates de personnes et une hors cor
 ## Limites
 
 - Les questions de test ont été écrites en lisant les articles. Même « paraphrasées », elles reprennent des mots du texte, ce qui avantage le TF-IDF. Avec 56 et 10 questions, les petits écarts ne sont pas significatifs.
-- `paraphrase-multilingual-MiniLM-L12-v2` est un modèle de paraphrase, pas un modèle de recherche question → passage. Un modèle comme `multilingual-e5` ou BGE-M3 serait plus adapté.
+- `paraphrase-multilingual-MiniLM-L12-v2` est un modèle de paraphrase, pas un modèle de recherche question-passage. Un modèle comme `multilingual-e5` ou BGE-M3 serait plus adapté.
 - La normalisation min-max donne toujours 1 au meilleur chunk : elle ne permet pas de détecter qu'aucun document ne répond.
 - Les sorties du notebook ont été obtenues sur CPU en float32. En float16 sur GPU, quelques réponses peuvent différer légèrement.
 
@@ -127,7 +155,7 @@ Dix questions de test : six factuelles, trois dates de personnes et une hors cor
 
 ## Environnement testé
 
-Python 3.11 · torch 2.15 (CPU) · transformers 5.22 · sentence-transformers 6.3 · scikit-learn 1.9 · datasets 5.2 · pandas 3.1 · langchain-text-splitters 1.1.
+Python 3.11, torch 2.15 (CPU), transformers 5.22, sentence-transformers 6.3, scikit-learn 1.9, datasets 5.2, pandas 3.1, langchain-text-splitters 1.1.
 
 Avec une version de transformers antérieure à 4.56, remplacer `dtype=` par `torch_dtype=` au chargement de Qwen (cellule 3.1).
 
